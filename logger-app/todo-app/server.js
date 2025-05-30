@@ -78,6 +78,37 @@ const server = http.createServer((req, res) => {
             res.end(JSON.stringify({ error: "Todo not found" }));
         }
     }
+    //  update todo
+    else if (pathname === "/todos/update-todo" && req.method === "PATCH") {
+        const title = url.searchParams.get("title");
+
+        let data = "";
+
+        req.on("data", (chunk) => {
+            data += chunk;
+        });
+
+        req.on("end", () => {
+            const { body } = JSON.parse(data);
+
+            const allTodos = fs.readFileSync(filePath, { encoding: "utf8" });
+            const parseAllTodos = JSON.parse(allTodos);
+
+            const todoIndex = parseAllTodos.findIndex((todo) => todo.title === title);
+
+            if (todoIndex === -1) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                return res.end(JSON.stringify({ error: "Todo not found" }));
+            }
+
+            parseAllTodos[todoIndex].body = body;
+
+            fs.writeFileSync(filePath, JSON.stringify(parseAllTodos, null, 2), { encoding: "utf8" });
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(parseAllTodos[todoIndex], null, 2));
+        });
+    }
 
 
 
