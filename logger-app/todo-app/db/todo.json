@@ -1,0 +1,27 @@
+[
+  {
+    "title": "First Note",
+    "body": "This is the body of the first note.",
+    "createdAt": "2025-05-30T12:00:00Z"
+  },
+  {
+    "title": "Second Note",
+    "body": "This is the body of the second note.",
+    "createdAt": "2025-05-30T14:30:00Z"
+  },
+  {
+    "title": "Third Note",
+    "body": "This is the body of the third note.",
+    "createdAt": "2025-05-30T16:45:00Z"
+  },
+  {
+    "title": "Express",
+    "body": "Learning Express",
+    "createdAt": "5/30/2025, 8:59:13 PM"
+  },
+  {
+    "title": "MongoDb",
+    "body": "Learning MongoDb",
+    "createdAt": "5/30/2025, 9:00:45 PM"
+  }
+]

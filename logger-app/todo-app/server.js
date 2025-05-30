@@ -1,41 +1,87 @@
 const http = require("http");
 const { url } = require("inspector");
+const path = require("path");
+const fs = require("fs")
 
-const data = [
-  {
-    "title": "First Note",
-    "body": "This is the body of the first note.",
-    "createdAt": "2025-05-30T12:00:00Z"
-  },
-  {
-    "title": "Second Note",
-    "body": "This is the body of the second note.",
-    "createdAt": "2025-05-30T14:30:00Z"
-  },
-  {
-    "title": "Third Note",
-    "body": "This is the body of the third note.",
-    "createdAt": "2025-05-30T16:45:00Z"
-  }
-]
-
+const filePath = path.join(__dirname, "./db/todo.json")
 
 const server = http.createServer((req, res) => {
-    console.log(`Incoming Request: ${req.method} ${req.url}`);
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const pathname = url.pathname;
 
-    if (req.url === "/todos" && req.method === "GET") {
+
+    // Get all todos
+
+    if (pathname === "/todos" && req.method === "GET") {
+
+        const data = fs.readFileSync(filePath, { encoding: "utf8" })
         res.writeHead(200, {
             "Content-Type": "application/json",
         });
-        // res.setHeader("Content-Type", "text/plain")
-        // res.setHeader("email", "ph2@gmail.com")
-        // res.statusCode = 201
-        res.end(JSON.stringify(data));
 
-    } else if (req.url === "/todos/create-todo" && req.method === "POST") {
-        res.end("TODO Created");
+        res.end(data);
 
-    } else {
+    }
+
+    // Post a Todos
+
+
+    else if (pathname === "/todos/create-todo" && req.method === "POST") {
+
+        let data = ""
+
+        req.on("data", (chunk) => {
+            data = data + chunk
+
+        })
+
+        req.on("end", () => {
+
+            const { title, body } = JSON.parse(data);
+
+            const createdAt = new Date().toLocaleString();
+
+            const allTodos = fs.readFileSync(filePath, { encoding: "utf8" });
+            const parseAllTodos = JSON.parse(allTodos);
+
+            parseAllTodos.push({ title, body, createdAt })
+
+            fs.writeFileSync(filePath, JSON.stringify(parseAllTodos, null, 2), { encoding: "utf8" });
+
+            res.end(JSON.stringify({ title, body, createdAt }, null, 2));
+        })
+
+
+    }
+
+    //  Get Single todo
+
+    else if (pathname === "/todo" && req.method === "GET") {
+        const title = url.searchParams.get("title");
+        console.log(title);
+
+        const data = fs.readFileSync(filePath, { encoding: "utf8" });
+        const parseData = JSON.parse(data);
+
+        const todo = parseData.find((todo) => todo.title === title);
+
+        res.writeHead(200, {
+            "Content-Type": "application/json",
+        });
+
+        if (todo) {
+            res.end(JSON.stringify(todo, null, 2));
+        } else {
+            res.writeHead(404, {
+                "Content-Type": "application/json",
+            });
+            res.end(JSON.stringify({ error: "Todo not found" }));
+        }
+    }
+
+
+
+    else {
         res.end("Route Not Found");
     }
 });
